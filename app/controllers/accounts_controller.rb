@@ -13,6 +13,12 @@ class AccountsController < ApplicationController
     render json: @account
   end
 
+  # GET /balance
+  def balance
+    account = set_account
+    render json: account.check_balance
+  end
+
   # POST /accounts
   def create
     @account = Account.new(account_params)
