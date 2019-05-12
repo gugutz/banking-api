@@ -6,7 +6,7 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-client1 = Client.create(name: 'john', password: "pass")
-client2 = Client.create(name: 'tau', password: "pass")
-account1 = Account.create(balance: 10_000, client: client1)
-account2 = Account.create(balance: 30_000, client: client2)
+client1 = Client.create(name: 'john', email: 'john@email.com', password: "encpass1")
+client2 = Client.create(name: 'tobias', email: 'tobias@email.com', password: "encpass2")
+account1 = Account.create(balance: 40_000, client: client1)
+account2 = Account.create(balance: 70_000, client: client2)
