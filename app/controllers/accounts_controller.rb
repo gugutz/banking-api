@@ -16,7 +16,13 @@ class AccountsController < ApplicationController
   # GET /balance
   def balance
     account = set_account
-    render json: account.check_balance
+    history = Audit.find_by(client: account.client_id)
+    history.each { |transfer|
+      @amount_transfered = @amount_transfered + transfer.amount
+
+    }
+    # render json: account.check_balance
+    render json: @amount_transfered
   end
 
   # POST /accounts
