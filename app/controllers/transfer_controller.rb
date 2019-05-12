@@ -1,5 +1,5 @@
 class TransferController < ApplicationController
-  before_action :authenticate_client!
+  # before_action :authenticate_client!
 
   def transfer
     if client_signed_in?
