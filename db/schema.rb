@@ -16,7 +16,8 @@ ActiveRecord::Schema.define(version: 2019_05_11_230817) do
   enable_extension "plpgsql"
 
   create_table "accounts", force: :cascade do |t|
-    t.integer "balance", null: false
+    t.integer "initial_balance", null: false
+    t.integer "current_balance", null: false
     t.bigint "client_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -41,6 +42,12 @@ ActiveRecord::Schema.define(version: 2019_05_11_230817) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "encrypted_password", default: "", null: false
+    t.datetime "remember_created_at"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.inet "current_sign_in_ip"
+    t.inet "last_sign_in_ip"
     t.index ["email"], name: "index_clients_on_email", unique: true
   end
 

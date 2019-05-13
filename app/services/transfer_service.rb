@@ -8,8 +8,8 @@ module TransferService
       amount = transfer_params[:amount]
 
       Account.transaction do
-        # source_account.withdraw!(amount)
-        # destination_account.deposit!(amount)
+        source_account.withdraw!(amount)
+        destination_account.deposit!(amount)
 
         Audit.create!(client_id: client.id, source_account_id: source_account.id, destination_account_id: destination_account.id, amount: amount)
       end

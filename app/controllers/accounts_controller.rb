@@ -20,7 +20,7 @@ class AccountsController < ApplicationController
   def balance
     account = set_account
 
-    initial_balance = account.check_balance
+    initial_balance = account.check_initial_balance
     deposits = Audit.where(destination_account_id: account.id)
     withdraws = Audit.where(source_account_id: account.id)
 
