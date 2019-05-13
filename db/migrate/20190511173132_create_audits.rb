@@ -1,12 +1,13 @@
 class CreateAudits < ActiveRecord::Migration[5.2]
   def change
     create_table :audits do |t|
-      t.string :client
-      t.integer :source_account_id
-      t.integer :destination_account_id
+      t.references :client
+      t.references :source_account, class_name: 'Account'
+      t.references :destination_account, class_name: 'Account'
       t.integer :amount
 
       t.timestamps
     end
+
   end
 end
