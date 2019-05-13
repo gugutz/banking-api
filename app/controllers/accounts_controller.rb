@@ -1,5 +1,8 @@
 class AccountsController < ApplicationController
+  include ActionView::Helpers::NumberHelper
+
   before_action :set_account, only: [:show, :update, :destroy]
+  rescue_from ::ActiveRecord::RecordNotFound, :with => :inexistent_account
 
   # GET /accounts
   def index
@@ -16,13 +19,37 @@ class AccountsController < ApplicationController
   # GET /balance
   def balance
     account = set_account
-    history = Audit.find_by(client: account.client_id)
-    history.each { |transfer|
-      @amount_transfered = @amount_transfered + transfer.amount
 
+    initial_balance = account.check_balance
+    deposits = Audit.where(destination_account_id: account.id)
+    withdraws = Audit.where(source_account_id: account.id)
+
+    total_deposits = []
+    total_withdraws = []
+
+    deposits.each { |transfer|
+      amount = transfer.amount
+      total_deposits.push(amount)
     }
-    # render json: account.check_balance
-    render json: @amount_transfered
+
+    withdraws.each { |transfer|
+      amount = transfer.amount
+      total_withdraws.push(amount)
+    }
+
+    total_income = total_deposits.reduce(:+)
+    total_outcome = total_withdraws.reduce(:+)
+    current_balance = initial_balance + total_income - total_outcome
+    balance_in_reais = number_to_currency_br(current_balance)
+
+    response = {
+      success: true,
+      error: nil,
+      data:  {
+        message: "The current balance for account #{account.id} is #{balance_in_reais}"
+      }
+    }
+    render json: response, status: :ok
   end
 
   # POST /accounts
@@ -51,13 +78,29 @@ class AccountsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_account
-      @account = Account.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_account
+    @account = Account.find(params[:id])
+  end
 
-    # Only allow a trusted parameter "white list" through.
-    def account_params
-      params.require(:account).permit(:balance)
-    end
+  def inexistent_account
+    response = {
+      success: false,
+      error: {
+        message: "This account does not exist"
+      },
+      data: nil
+    }
+
+    render json: response, status: :not_found
+  end
+
+  def number_to_currency_br(number)
+    number_to_currency(number, :unit => "R$ ", :separator => ",", :delimiter => ".")
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def account_params
+    params.require(:account).permit(:balance)
+  end
 end
