@@ -2,7 +2,7 @@ class AccountsController < ApplicationController
   include ActionView::Helpers::NumberHelper
 
   before_action :set_account, only: [:show, :update, :destroy]
-  rescue_from ::ActiveRecord::RecordNotFound, :with => :inexistent_account
+  rescue_from ::ActiveRecord::RecordNotFound, with: :inexistent_account
 
   # GET /accounts
   def index
