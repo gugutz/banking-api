@@ -4,64 +4,73 @@ class SessionsController < ApplicationController
   respond_to :json
 
   wrap_parameters format: []
-  def login
-    client = Client.find_for_authentication(email: login_params[:email])
-    # @client = Client.find_by(email: login_params[:email] )
-    logger.warn(client[:name])
 
-    # return invalid_login_attempt unless resource
-
-    if client.valid_password?(login_params[:password])
-      logger.info("Client password is valid.")
-      sign_in("client", client)
-    end
-
-    if client_signed_in?
-      logger.info("signed in!")
-      logger.info(current_client.name)
-      logger.info(client_session)
-      response = {
-        data: login_params,
-        error: nil
-      }
-      render json: response, status: :ok
-    else
-      render json: {error: "login was not successfull"}, status: :unprocessable_entity
-    end
-  end
-  
-
-
-  def logout
-    sign_out(current_client)
-    unless client_signed_in?
-      render json: {success: "logged out!", status: :ok}
-    else
-      render json: {error: "logout error"}, status: :unprocessable_entity
-    end
-  end
-  
   def create
+    email = login_params[:email]
+    password = login_params[:password]
+    
+    @client = Client.find_for_database_authentication(email: email)
+
+    return render_invalid_credentials if @client.blank?
+
+    if @client.valid_password?(password)
+      sign_in("client", @client)
+      sign_in(@client)
+      authenticate_client!
+
+      logger.info("Client password is valid. #{@client.name} signed in! ")
+
+      response = {
+        success: true,
+        error: nil,
+        data: {
+          message: "Session created successfully!"
+        },
+      }
+
+      if client_signed_in?
+        logger.info("confirmed signedin")
+      end
+
+      render json: response, status: :ok
+      # binding.pry
+    else
+      render_invalid_credentials
+    end
+  end
+  
+  def destroy
+    sign_out(current_client)
+    response = {
+      success: true,
+      error: nil,
+      data:  {
+        message: "Session destroyed!"
+      }
+    }
+    render json: response, status: :ok
   end
   
   private
-
   def ensure_params_exist
     return unless params[:email.blank?]
     render json: {success: false, message: "missing user_login parameter"}, status: :unprocessable_entity
   end
 
-  def invalid_login_attempt
-    warden.custom_failure!
-    render json: {
+  def render_invalid_credentials
+    response = {
       success: false,
-      message: "Error with your login or password"
-    },
-      status: :unauthorized
+      error: {
+        message: "Invalid credentials!"
+      },
+      data: nil
+    }
+
+    render json: response, status: :unauthorized
   end
-  
+
   def login_params
-    params.permit(:email, :password)
+    params.permit(:session, :email, :password)
   end
 end
 
