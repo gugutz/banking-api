@@ -1,18 +1,6 @@
 class ClientsController < ApplicationController
   before_action :set_client, only: [:show, :update, :destroy]
 
-  # GET /clients
-  def index
-    @clients = Client.all
-
-    render json: @clients
-  end
-
-  # GET /clients/1
-  def show
-    render json: @client
-  end
-
   # POST /clients
   def create
     @client = Client.new(client_params)
